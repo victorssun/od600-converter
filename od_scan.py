@@ -13,18 +13,26 @@ Created on Wed Dec 19 01:55:58 2018
 
 import numpy as np
 import pandas as pd
-import time, struct, math, serial, sys
+import time, struct, math, serial, sys, os
 import matplotlib.pyplot as plt
-#from pandas.tools.plotting import table
 from pandas.plotting import table
 
 def initSpec():
-    spec = serial.Serial('/dev/ttyUSB0', baudrate=9600, timeout=1)
+    if os.name == 'posix':
+        spec = serial.Serial('/dev/ttyUSB0', baudrate=9600, timeout=1)
+    elif os.name == 'nt':
+        spec = serial.Serial('COM3', baudrate=9600, timeout=1) # COM3 for closest left usb port
+#    spec = serial.Serial('/dev/ttyUSB0', baudrate=9600, timeout=1)
     spec.write('a\n')
     spec.write('K0\n')
     print spec.readlines()
     spec.close()
-    spec2 = serial.Serial('/dev/ttyUSB0', baudrate=115200, timeout=1)
+    
+    if os.name == 'posix':
+        spec2 = serial.Serial('/dev/ttyUSB0', baudrate=115200, timeout=1)
+    elif os.name == 'nt':
+        spec2 = serial.Serial('COM3', baudrate=115200, timeout=1)	
+#    spec2 = serial.Serial('/dev/ttyUSB0', baudrate=115200, timeout=1)
     spec2.write('a\n')
     print spec2.readlines()
     spec.close()
@@ -98,8 +106,8 @@ def selectPx(data, bg, px_select):
 
 
 ### MAIN CODE ###
-if len(sys.argv) == 2:
-    initSpec()
+#if len(sys.argv) == 2:
+#    initSpec()
 # init
 averages = 30 # 25
 iterations = 1  # 3
@@ -107,7 +115,12 @@ integration = 1000 # 1000
 #px_select = 752 - 1 # 600; 903, 680; 660, 550
 px_select = [751, 752, 550, 549] # 599.46, 600.00, 550.06, 549.51
 
-spec = serial.Serial('/dev/ttyUSB0', baudrate=115200, timeout=1)
+# idk what this does, but keep it (may not need this though)
+if os.name == 'posix':
+    spec = serial.Serial('/dev/ttyUSB0', baudrate=115200, timeout=1)
+elif os.name == 'nt':
+    spec = serial.Serial('COM3', baudrate=115200, timeout=1)
+#spec = serial.Serial('/dev/ttyUSB0', baudrate=115200, timeout=1)
 print('readlines...')
 print(spec.readlines()) # ?
 spec.write('b\n') # idk
